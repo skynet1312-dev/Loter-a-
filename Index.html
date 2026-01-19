@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="description" content="Generador de números para EuroMillions y EuroDreams">
+    <title>Generador de Lotería</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        function App() {
+            const [euroMillions, setEuroMillions] = useState({ main: [], extra: [] });
+            const [euroDreams, setEuroDreams] = useState({ main: [], extra: [] });
+            useEffect(() => {
+                setEuroMillions({ main: [], extra: [] });
+                setEuroDreams({ main: [], extra: [] });
+            }, []);
+            const getSecureRandomNumber = (min, max) => {
+                const range = max - min + 1;
+                const bytesNeeded = Math.ceil(Math.log2(range) / 8);
+                const maxValidValue = Math.floor(256 ** bytesNeeded / range) * range - 1;
+                let randomValue;
+                do {
+                    const randomBytes = new Uint8Array(bytesNeeded);
+                    crypto.getRandomValues(randomBytes);
+                    randomValue = randomBytes.reduce((acc, byte, i) => acc + byte * (256 ** i), 0);
+                } while (randomValue > maxValidValue);
+                return min + (randomValue % range);
+            };
+            const generateEuroMillions = () => {
+                const mains = [];
+                while (mains.length < 5) {
+                    const num = getSecureRandomNumber(1, 50);
+                    if (!mains.includes(num)) mains.push(num);
+                }
+                mains.sort((a, b) => a - b);
+                const extras = [];
+                while (extras.length < 2) {
+                    const num = getSecureRandomNumber(1, 12);
+                    if (!extras.includes(num)) extras.push(num);
+                }
+                extras.sort((a, b) => a - b);
+                setEuroMillions({ main: mains, extra: extras });
+            };
+            const generateEuroDreams = () => {
+                const mains = [];
+                while (mains.length < 6) {
+                    const num = getSecureRandomNumber(1, 40);
+                    if (!mains.includes(num)) mains.push(num);
+                }
+                mains.sort((a, b) => a - b);
+                const extra = getSecureRandomNumber(1, 5);
+                setEuroDreams({ main: mains, extra: [extra] });
+            };
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+                        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Generador de Loterías</h1>
+                        <div className="mb-8 p-6 bg-gray-50 rounded-xl">
+                            <div className="mb-4">
+                                <p className="text-sm font-semibold text-gray-600 mb-3 text-center">5 números (1-50)</p>
+                                <div className="flex justify-center gap-3 mb-4 flex-wrap">
+                                    {euroMillions.main.length > 0 ? (
+                                        euroMillions.main.map((num, idx) => (
+                                            <div key={idx} className="w-14 h-14 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-lg">{num}</div>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-400">Presiona el botón para generar</p>
+                                    )}
+                                </div>
+                                <p className="text-sm font-semibold text-gray-600 mb-3 text-center">2 estrellas (1-12)</p>
+                                <div className="flex justify-center gap-3 mb-4">
+                                    {euroMillions.extra.length > 0 ? (
+                                        euroMillions.extra.map((num, idx) => (
+                                            <div key={idx} className="w-14 h-14 bg-yellow-500 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-lg">{num}</div>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-400">-</p>
+                                    )}
+                                </div>
+                            </div>
+                            <button onClick={generateEuroMillions} className="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">Euromillones - Generar</button>
+                        </div>
+                        <div className="p-6 bg-gray-50 rounded-xl">
+                            <div className="mb-4">
+                                <p className="text-sm font-semibold text-gray-600 mb-3 text-center">6 números (1-40)</p>
+                                <div className="flex justify-center gap-3 mb-4 flex-wrap">
+                                    {euroDreams.main.length > 0 ? (
+                                        euroDreams.main.map((num, idx) => (
+                                            <div key={idx} className="w-14 h-14 bg-purple-500 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-lg">{num}</div>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-400">Presiona el botón para generar</p>
+                                    )}
+                                </div>
+                                <p className="text-sm font-semibold text-gray-600 mb-3 text-center">1 número Dream (1-5)</p>
+                                <div className="flex justify-center gap-3 mb-4">
+                                    {euroDreams.extra.length > 0 ? (
+                                        euroDreams.extra.map((num, idx) => (
+                                            <div key={idx} className="w-14 h-14 bg-pink-500 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-lg">{num}</div>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-400">-</p>
+                                    )}
+                                </div>
+                            </div>
+                            <button onClick={generateEuroDreams} className="w-full bg-gradient-to-r from-purple-500 to-purple-700 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-600 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">Eurodreams - Generar</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker registrado'))
+                .catch(err => console.log('Error al registrar Service Worker', err));
+        }
+    </script>
+</body>
+</html>
